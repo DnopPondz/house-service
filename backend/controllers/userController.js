@@ -2,8 +2,9 @@ import UserModel from "../models/User.js";
 import bcrypt from "bcrypt";
 import sendEmailVerificationOTP from "../utils/sendEmailVerificationOTP.js";
 import EmailVerificationModel from "../models/EmailVerification.js";
-import genarateTokens from "../utils/genarateToken.js";
 import setTokensCookies from "../utils/setTokensCookies.js";
+import generateTokens from "../utils/genarateToken.js"
+import refreshAccessToken from "../utils/refreshAccessToken.js";
 
 class UserController {
   // User Registration
@@ -149,69 +150,81 @@ class UserController {
   };
 
  // User login
-static userLogin = async (req, res) => {
-    try {
-      const { email, password } = req.body;
-  
-      // Check if email and password are provided
-      if (!email || !password) {
-        return res.status(400).json({
-          status: "failed",
-          message: "Email and password are required",
-        });
-      }
-  
-      // Find user by email
-      const user = await UserModel.findOne({ email });
-  
-      // Check if user exists
+ static userLogin = async (req, res) => {
+  try {
+      // ดึงข้อมูล user จากฐานข้อมูล
+      const user = await UserModel.findOne({ email: req.body.email });
       if (!user) {
-        return res.status(404).json({ status: "failed", message: "User not found" });
+          return res.status(401).json({ status: "error", message: "Invalid credentials" });
       }
-  
-      // Check if the account is verified
-      if (!user.is_verifiled) {
-        return res.status(401).json({ status: "failed", message: "Your account is not verified" });
+
+      // ✅ ตรวจสอบว่า generateTokens return ค่าอะไร
+      const tokens = await generateTokens(user);
+      console.log("Generated Tokens:", tokens);
+
+      if (!tokens) {
+          return res.status(500).json({ status: "error", message: "Failed to generate tokens" });
       }
-  
-      // Compare password
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(401).json({ status: "failed", message: "Invalid email or password" });
-      }
-  
-      // Generate tokens
-      const { accessToken, refreshToken, accessTokenExp, refreshTokenExp } = await genarateTokens(user);
-  
-      // Set cookies
+
+      const { accessToken, refreshToken, accessTokenExp, refreshTokenExp } = tokens;
+
+      // ✅ ตั้งค่า Cookies
       setTokensCookies(res, accessToken, refreshToken, accessTokenExp, refreshTokenExp);
-  
-      // Send success response with token
+
+      // ✅ ส่ง response กลับไป
       res.status(200).json({
-        user: { id: user._id, email: user.email, name: user.name, roles: user.roles[0] },
-        status: "success",
-        message: "Login successful",
-        access_token: accessToken,
-        refresh_token: refreshToken,
-        access_token_exp: accessTokenExp,
-        is_auth: true,
+          user: { id: user._id, email: user.email, name: user.name, roles: user.roles[0] },
+          status: "success",
+          message: "Login successful",
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          access_token_exp: accessTokenExp,
+          is_auth: true,
       });
-  
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        status: "failed",
-        message: "Unable to login, please try again later",
-      });
-    }
-  };
-  
+  } catch (error) {
+      console.error("Error in userLogin:", error);
+      res.status(500).json({ status: "error", message: "Internal server error" });
+  }
+};
 
   // Get New Access Token OP Refesh Token
-
-  // Change Password
+  static getNewAccessToken = async (req, res) => {
+    try {
+      // ตรวจสอบการเรียกใช้ refreshAccessToken
+      const { newAccessToken, newRefreshToken, newAccessTokenExp, newRefreshTokenExp } = await refreshAccessToken(res, req);
+  
+      // หากไม่พบค่ากลับ ให้ส่งข้อความผิดพลาด
+      if (!newAccessToken || !newRefreshToken) {
+        return res.status(401).json({ status: "failed", message: "Unable to generate new token" });
+      }
+  
+      // ตั้งค่า Cookies ใหม่
+      setTokensCookies(res, newAccessToken, newRefreshToken, newAccessTokenExp, newRefreshTokenExp);
+  
+      // ส่ง response กลับไป
+      res.status(200).json({
+        status: "success",
+        message: "New token generated",
+        access_token: newAccessToken,
+        refresh_token: newRefreshToken,
+        access_token_exp: newAccessTokenExp
+      });
+    } catch (error) {
+      console.error(error);
+      // ถ้ามีข้อผิดพลาดให้ส่งกลับเป็น 500
+      res.status(500).json({ status: "failed", message: "Unable to generate new token, please try again later" });
+    }
+  };
 
   // Profile OR Logged in User
+  static userProfile = async(req, res) => {
+    res.send({ "user": req.user })
+  }
+
+
+
+
+  // Change Password
 
   // Send Password Reset Email
 

@@ -1,25 +1,24 @@
-const setTokensCookies = ( accessToken, refreshToken, accessTokenExp, refreshTokenExp  ) => {  
+import cookie from 'cookie';
 
-    const accessTokenMaxAge = (newAccessTokenExp - Math.floor(Date.now() / 1000)) * 1000;
+// Function to set tokens as cookies
+const setTokensCookies = (res, accessToken, refreshToken, accessTokenExp, refreshTokenExp) => {
+    // Set the access token cookie
+    res.setHeader('Set-Cookie', [
+        cookie.serialize('access_token', accessToken, {
+            httpOnly: true, // Make the cookie inaccessible to JavaScript (prevents XSS attacks)
+            secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+            maxAge: accessTokenExp, // Set the expiration time of the access token cookie
+            path: '/' // Set the path for which the cookie is valid
+        }),
 
-    const refreshTokenmaxAge = (newrefeshTokenExp - Math.floor(Date.now() / 1000)) * 1000;
-
-    //set Cookie for Access Token 
-    resizeBy.cookie('accessToken', accessToken, {
-        httpOnly: true,
-        secure: true, // set to true using HTTPS
-        maxAge: accessTokenMaxAge,
-        // sameSite: 'strict', // adjust according to your requirement
-    })
-
-    //set Cookie for Refresh Token 
-    resizeBy.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: true, // set to true using HTTPS
-        maxAge: refreshTokenmaxAge,
-        // sameSite: 'strict', // adjust according to your requirement
-    })
-
+        // Set the refresh token cookie
+        cookie.serialize('refresh_token', refreshToken, {
+            httpOnly: true, // Make the cookie inaccessible to JavaScript (prevents XSS attacks)
+            secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+            maxAge: refreshTokenExp, // Set the expiration time of the refresh token cookie
+            path: '/' // Set the path for which the cookie is valid
+        })
+    ]);
 };
 
-export default setTokensCookies
+export default setTokensCookies;
