@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser'
 import connectDB from './config/connectdb.js';
 import passport from 'passport';
 import userRoutes from './routes/userRoutes.js';
+import './config/passport-jwt-strategy.js'
 
 dotenv.config()
 const app = express()
@@ -32,6 +33,7 @@ app.use(passport.initialize())
 // Cookie Parser
 app.use(cookieParser())
 
+app.use(express.urlencoded({ extended: true }));
 
 //  Load Routes API
 app.use("/api/user", userRoutes)
