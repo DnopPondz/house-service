@@ -17,6 +17,12 @@ const setTokensCookies = (res, accessToken, refreshToken, accessTokenExp, refres
             secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
             maxAge: refreshTokenExp, // Set the expiration time of the refresh token cookie
             path: '/' // Set the path for which the cookie is valid
+        }),
+        cookie.serialize('is_auth', true, {
+            httpOnly: false, // Make the cookie inaccessible to JavaScript (prevents XSS attacks)
+            secure: false, // Use secure cookies in production
+            maxAge: refreshTokenExp, // Set the expiration time of the refresh token cookie
+            path: '/' // Set the path for which the cookie is valid
         })
     ]);
 };

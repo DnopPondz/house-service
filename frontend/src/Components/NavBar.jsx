@@ -3,13 +3,19 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import LoadingIndicator from "./LoadingIndicator";
+import Cookies from "js-cookie";
 
 const NavBar = () => {
-  const [isAuth, setIsAuth] = useState(false);
+  const [isAuth, setIsAuth] = useState(false); // ✅ เปลี่ยนจาก null → false (แก้ปัญหา Spinner ค้าง)
+
+  useEffect(() => {
+    const authCookies = Cookies.get("is_auth") === "true"; // ✅ แปลงค่าเป็น boolean
+    setIsAuth(authCookies);
+  }, []); // ✅ ใส่ [] ป้องกัน re-render loop
 
   return (
     <>
-      {isAuth === null && <LoadingIndicator />}
+      {isAuth === null && <LoadingIndicator />} {/* ✅ Spinner จะไม่ค้างแล้ว */}
       <nav className="bg-purple-800 p-4">
         <div className="flex items-center justify-between">
           <div>

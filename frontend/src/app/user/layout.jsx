@@ -1,17 +1,16 @@
-import UserSidebar from "@/Components/UserSidebar"
+import UserSidebar from "@/Components/UserSidebar";
 
-const UserLayout = ({children}) => {
+const UserLayout = ({ children }) => {
   return (
-    <div className="grid grid-cols-12">
-    <div className="col-span-2 h-screen">
-        <UserSidebar/>
+    <div className="grid grid-cols-12 min-h-screen">
+      <div className="col-span-2 h-full overflow-y-auto bg-purple-800">
+        <UserSidebar />
+      </div>
+      <div className="col-span-10 bg-gray-100 h-full overflow-y-auto">
+        {children}
+      </div>
     </div>
-    <div className="col-span-10 bg-gray-100 h-screen">
-    {children}
-    </div>
-    </div>
-    
-  )
-}
+  );
+};
 
-export default UserLayout
+export default UserLayout;
