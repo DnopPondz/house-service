@@ -3,9 +3,12 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL, // ✅ ใช้ .env แทน localhost
+    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
     credentials: "include",
   }),
+
+  
+
   endpoints: (builder) => ({
     registerUser: builder.mutation({
       query: (userData) => ({
@@ -81,3 +84,6 @@ export const {
   useResetPasswordMutation,
   useChangePasswordMutation,
 } = authApi;
+
+
+console.log("NEXT_PUBLIC_API_BASE_URL:", process.env.NEXT_PUBLIC_API_BASE_URL);
