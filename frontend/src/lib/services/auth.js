@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:5000/api/user",
+    baseUrl: import.meta.env.VITE_API_BASE_URL, // ✅ ใช้ .env แทน localhost
     credentials: "include",
   }),
   endpoints: (builder) => ({
@@ -46,7 +46,7 @@ export const authApi = createApi({
     }),
     resetPasswordLink: builder.mutation({
       query: (user) => ({
-        url: "/reset-password-link", // ✅ เพิ่ม `/` ให้ถูกต้อง
+        url: "/reset-password-link",
         method: "POST",
         body: user,
         headers: { "Content-Type": "application/json" },
@@ -54,15 +54,15 @@ export const authApi = createApi({
     }),
     resetPassword: builder.mutation({
       query: ({ id, token, ...values }) => ({
-        url: `/reset-password/${id}/${token}`, // ✅ ใช้ id และ token ใน URL
+        url: `/reset-password/${id}/${token}`,
         method: "POST",
-        body: values, // ✅ ไม่ส่ง id และ token ใน body
+        body: values,
         headers: { "Content-Type": "application/json" },
       }),
     }),
     changePassword: builder.mutation({
       query: (actualData) => ({
-        url: "/change-password", // ✅ เพิ่ม `/` ให้ URL ถูกต้อง
+        url: "/change-password",
         method: "POST",
         body: actualData,
         headers: { "Content-Type": "application/json" },
@@ -77,7 +77,7 @@ export const {
   useLoginUserMutation, 
   useGetUserQuery, 
   useLogoutUserMutation,
-  useResetPasswordLinkMutation, // ✅ Export ถูกต้อง
-  useResetPasswordMutation, // ✅ Export ถูกต้อง
-  useChangePasswordMutation, // ✅ เพิ่ม export changePassword
+  useResetPasswordLinkMutation,
+  useResetPasswordMutation,
+  useChangePasswordMutation,
 } = authApi;
