@@ -14,13 +14,38 @@ const port = process.env.PORT || 5000;
 const DATABASE_URL = process.env.MONGO_URI;
 const FRONTEND_HOST = process.env.FRONTEND_HOST || "http://localhost:3000";
 
-// ✅ แก้ไข CORS Policy
+// ✅ Middleware CORS
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "https://house-service-five.vercel.app");
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+    if (req.method === "OPTIONS") {
+        return res.status(200).end();
+    }
+
+    next();
+});
+
+const allowedOrigins = [
+    "http://localhost:3000",
+    "https://house-service-five.vercel.app"
+];
+
 const corsOptions = {
-    origin: FRONTEND_HOST,
-    credentials: true, // ✅ ต้องเป็นตัวเล็ก
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true, // ✅ สำคัญสำหรับ cookie หรือ JWT
     optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
+
 
 // ✅ เชื่อมต่อ Database 
 connectDB(DATABASE_URL);
